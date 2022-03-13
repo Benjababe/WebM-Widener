@@ -1,10 +1,10 @@
-from PIL import Image
-from tkinter import BOTH, filedialog
-import tkinter as tk
 import ffmpeg
+import PIL
+import tkinter as tk
+
+import glob
 import math
 import os
-import glob
 
 
 MAX_WIDTH = 960
@@ -17,15 +17,15 @@ def show_ui():
     lbl_f = tk.Label(text="File: ")
     lbl_f.pack()
     lbl_file = tk.Label(text="-")
-    lbl_file.pack(fill=BOTH)
+    lbl_file.pack(fill=tk.BOTH)
 
     lbl_u = tk.Label(text="Status: ")
     lbl_u.pack()
     lbl_update = tk.Label(text="-")
-    lbl_update.pack(fill=BOTH)
+    lbl_update.pack(fill=tk.BOTH)
 
     def pick_file():
-        file_dir = filedialog.askopenfilename(
+        file_dir = tk.filedialog.askopenfilename(
             initialdir="./", title="Select webm", filetypes=(("webm files", "*.webm"), ("all files", "*"))
         )
         lbl_file["text"] = file_dir
@@ -92,7 +92,7 @@ def widen_frames(window: tk.Tk, lbl_update: tk.Label, frames: int, widen_rate: i
     global MAX_WIDTH
 
     for i in range(frames):
-        img = Image.open(f"{WORKING_FOLDER}/frame{i}.jpg")
+        img = PIL.Image.open(f"{WORKING_FOLDER}/frame{i}.jpg")
 
         new_width = img.width + i * widen_rate \
             if img.width < MAX_WIDTH else MAX_WIDTH + i * widen_rate
