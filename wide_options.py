@@ -3,8 +3,9 @@ class WideOptions():
     encoder: str
     v_bitrate: int
     widen_rate: int
-    frames: int = 1
-    framerate: float = 1.0
+    frame_count: int = 1
+    framerate: float = 24.0
+    duration: float = 10
 
     def __init__(self, file_dir: str, encoder: str, v_bitrate: int, widen_rate: int = 2):
         super().__init__()

@@ -2,7 +2,7 @@ import tkinter as tk
 import tkinter.filedialog
 from consts import BG_PATH, ICON_PATH
 
-from wide import widen_webm
+from wide import widen_image, widen_webm
 from wide_options import WideOptions
 
 
@@ -38,7 +38,7 @@ def show_ui():
     # opens file picker
     def pick_file():
         file_dir = tkinter.filedialog.askopenfilename(
-            initialdir="./", title="Select File", filetypes=(("WebM files", "*.webm"), ("Image files", "*.png"), ("All files", "*"))
+            initialdir="./", title="Select File", filetypes=(("WebM files", "*.webm"), ("Image files", "*.jpg"), ("All files", "*"))
         )
         var_file.set(file_dir)
         window.update()
@@ -86,7 +86,7 @@ def show_ui():
         if var_input.get() == 0:
             widen_webm(window, var_status, wide_options)
         else:
-            print("Do image here")
+            widen_image(window, var_status, wide_options)
     # end_widen_file
 
     # draws buttons for widening process
