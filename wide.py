@@ -49,10 +49,11 @@ def widen_webm(window: tk.Tk, lbl_status: tk.Label, w_options: WideOptions):
 # end_widen
 
 
-def update_status_lbl(update_str: str, col: str = "#fff"):
+def update_lbl_status(update_str: str, col: str = "#000"):
     lbl["text"] = update_str
     lbl.config(fg=col)
     main_window.update()
+# end_update_status_lbl
 
 
 def get_frame_count(w_options: WideOptions) -> int:
@@ -72,7 +73,7 @@ def get_framerate(w_options: WideOptions) -> float:
 
 
 def split_video(w_options: WideOptions):
-    update_status_lbl("Splitting video into frames...")
+    update_lbl_status("Splitting video into frames...")
 
     if not os.path.exists(WORKING_FOLDER):
         os.mkdir(WORKING_FOLDER)
@@ -98,7 +99,7 @@ def widen_frames(w_options: WideOptions):
         img_resized.save(f"{WORKING_FOLDER}/frame{i}.jpg")
 
         print(f"Resizing frame {i} / {w_options.frames-1}")
-        update_status_lbl(f"Resizing frame {i} / {w_options.frames-1}")
+        update_lbl_status(f"Resizing frame {i} / {w_options.frames-1}")
 # end_widen_frames
 
 
@@ -110,7 +111,7 @@ def frame_to_webm(w_options: WideOptions):
             .run(quiet=True, overwrite_output=True)
 
         print(f"Converting frame to video {i} / {w_options.frames-1}")
-        update_status_lbl(
+        update_lbl_status(
             f"Converting frame to video {i} / {w_options.frames-1}")
 # end_frame_to_webm
 
@@ -128,13 +129,13 @@ def concat_webm(w_options: WideOptions):
 
     file_name = w_options.file_dir.split("/")[-1]
 
-    update_status_lbl("Concatenating all frames together...")
+    update_lbl_status("Concatenating all frames together...")
 
     os.system(
         f"ffmpeg -y -f concat -safe 0 -i {WORKING_FOLDER}/cat.txt -c copy wide_{w_options.encoder}_{file_name}"
     )
 
-    update_status_lbl("Widening completed!", "#0f0")
+    update_lbl_status("Widening completed!", "#0f0")
 # end_concat_webm
 
 
