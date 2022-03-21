@@ -69,7 +69,7 @@ def show_ui():
 
     # draws buttons for selecting file and starting widening
     btn_file = tk.Button(text="Select File", command=pick_file)
-    btn_file.pack()
+    btn_file.pack(pady=6)
 
     def widen_file():
         wide_options = WideOptions(
@@ -83,7 +83,7 @@ def show_ui():
 
     btn_widen = tk.Button(text="Start Widening",
                           command=widen_file)
-    btn_widen.pack(pady=2)
+    btn_widen.pack(pady=6)
 
     window.mainloop()
 
