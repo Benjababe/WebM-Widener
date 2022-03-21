@@ -26,23 +26,12 @@ def widen_image(window: tk.Tk, var_status: tk.StringVar, w_options: WideOptions)
     main_window = window
     main_var = var_status
 
-    # find frame count of output video
     w_options.frame_count = int(w_options.framerate * w_options.duration)
 
-    # ensures working directory exists before starting
     check_working_dir()
-
-    # creates widened frames based on starting image
     generate_frames(w_options)
-
-    # converts frames into their own individual video
     frame_to_webm(w_options)
-
-    # concatenates all videos together, keeping the WIDE resolution for each frame
-    # TODO find a way to do it natively for ffmpeg-python
     concat_webm(w_options)
-
-    # cleanup crew
     clean_up()
 # end_widen_image
 
@@ -58,32 +47,25 @@ def widen_webm(window: tk.Tk, var_status: tk.StringVar, w_options: WideOptions):
     main_window = window
     main_var = var_status
 
-    # ensures working directory exists before starting
-    check_working_dir()
-
-    # find frame count and framerate of video
     w_options.frame_count = get_frame_count(w_options)
     w_options.framerate = get_framerate(w_options)
 
-    # splits webm into individual frames
+    check_working_dir()
     split_video(w_options)
-
-    # manipulates frame sizes into being WIDE incrementally
     widen_frames(w_options)
-
-    # converts frames into their own individual video
     frame_to_webm(w_options)
-
-    # concatenates all videos together, keeping the WIDE resolution for each frame
-    # TODO find a way to do it natively for ffmpeg-python
     concat_webm(w_options)
-
-    # cleanup crew
     clean_up()
 # end_widen
 
 
-def update_lbl_status(update_str: str, col: str = "#000"):
+def update_lbl_status(update_str: str):
+    """ Updates status label on main tkinter window
+
+    Args:
+        update_str (str): String to set label to
+    """
+
     global main_window, main_var
 
     print(update_str)
@@ -96,6 +78,7 @@ def update_lbl_status(update_str: str, col: str = "#000"):
 def check_working_dir():
     if not os.path.exists(WORKING_FOLDER):
         os.mkdir(WORKING_FOLDER)
+# end_check_working_dir
 
 
 def get_frame_count(w_options: WideOptions) -> int:
@@ -115,6 +98,12 @@ def get_framerate(w_options: WideOptions) -> float:
 
 
 def generate_frames(w_options: WideOptions):
+    """ Create incrementally widening frames from initial image.
+
+    Args:
+        w_options (WideOptions): WideOptions object, contains initial image directory, widen rate and frame count
+    """
+
     base_img = Image.open(w_options.file_dir)
 
     if base_img.height > MAX_HEIGHT:
@@ -132,6 +121,12 @@ def generate_frames(w_options: WideOptions):
 
 
 def split_video(w_options: WideOptions):
+    """ Splits the initial video into individual frames
+
+    Args:
+        w_options (WideOptions): WideOptions object, contains initial video directory
+    """
+
     update_lbl_status("Splitting video into frames...")
 
     ffmpeg.input(w_options.file_dir)\
@@ -141,6 +136,12 @@ def split_video(w_options: WideOptions):
 
 
 def widen_frames(w_options: WideOptions):
+    """ Widens the frames generated from splitting the video
+
+    Args:
+        w_options (WideOptions): WideOptions object, contains frame count and widen rate
+    """
+
     global MAX_HEIGHT
 
     for i in range(w_options.frame_count):
@@ -159,6 +160,12 @@ def widen_frames(w_options: WideOptions):
 
 
 def frame_to_webm(w_options: WideOptions):
+    """ Converts each widened frame to a single frame webm video
+
+    Args:
+        w_options (WideOptions): WideOptions object, contains frame count, framerate, video bitrate and video encoder
+    """
+
     for i in range(w_options.frame_count):
         ffmpeg\
             .input(f"{WORKING_FOLDER}/frame{i}.jpg", framerate=w_options.framerate)\
@@ -172,6 +179,12 @@ def frame_to_webm(w_options: WideOptions):
 
 
 def concat_webm(w_options: WideOptions):
+    """ Combined all single frame webms into a full length video
+
+    Args:
+        w_options (WideOptions): WideOptions object, contains frame count, initial file directory and video encoder
+    """
+
     # WORKING_FOLDER not needed here because it uses the cat.txt's reference directory
     webm_list = [
         f"file 'frame{i}.webm'" for i in range(w_options.frame_count)
@@ -191,11 +204,14 @@ def concat_webm(w_options: WideOptions):
         f"ffmpeg -y -f concat -safe 0 -i {WORKING_FOLDER}/cat.txt -c copy wide_{w_options.encoder}_{filename}.webm"
     )
 
-    update_lbl_status("Widening completed!", "#0f0")
+    update_lbl_status("Widening completed!")
 # end_concat_webm
 
 
 def clean_up():
+    """ Removes all generated files during the widening process
+    """
+
     for file in glob.glob(f"{WORKING_FOLDER}/frame[0-9]*.jpg"):
         os.remove(file)
 
