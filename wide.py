@@ -6,7 +6,7 @@ import glob
 import re
 import os
 
-from consts import MAX_HEIGHT, WORKING_FOLDER
+from consts import TYPE_WEBM, TYPE_IMG, MAX_HEIGHT, WORKING_FOLDER
 from wide_options import WideOptions
 
 
@@ -15,44 +15,29 @@ main_window: tk.Tk = None
 main_var: tk.StringVar = None
 
 
-def widen_image(window: tk.Tk, var_status: tk.StringVar, w_options: WideOptions):
+def widen(window: tk.Tk, var_status: tk.StringVar, w_options: WideOptions):
     global main_window, main_var
 
     # quits if no file specified
     if w_options.file_dir == "":
         return
 
-    # keeping reference to ui globally
-    main_window = window
-    main_var = var_status
-
-    w_options.frame_count = int(w_options.framerate * w_options.duration)
-
     check_working_dir()
-    generate_frames(w_options)
-    frame_to_webm(w_options)
-    concat_webm(w_options)
-    clean_up()
-# end_widen_image
-
-
-def widen_webm(window: tk.Tk, var_status: tk.StringVar, w_options: WideOptions):
-    global main_window, main_var
-
-    # quits if no file specified
-    if w_options.file_dir == "":
-        return
 
     # keeping reference to ui globally
     main_window = window
     main_var = var_status
 
-    w_options.frame_count = get_frame_count(w_options)
-    w_options.framerate = get_framerate(w_options)
+    if w_options.file_type == TYPE_WEBM:
+        w_options.frame_count = get_frame_count(w_options)
+        w_options.frame_rate = get_framerate(w_options)
+        split_video(w_options)
+        widen_frames(w_options)
 
-    check_working_dir()
-    split_video(w_options)
-    widen_frames(w_options)
+    elif w_options.file_type == TYPE_IMG:
+        w_options.frame_count = int(w_options.duration * w_options.frame_rate)
+        generate_frames(w_options)
+
     frame_to_webm(w_options)
     concat_webm(w_options)
     clean_up()
@@ -168,7 +153,7 @@ def frame_to_webm(w_options: WideOptions):
 
     for i in range(w_options.frame_count):
         ffmpeg\
-            .input(f"{WORKING_FOLDER}/frame{i}.jpg", framerate=w_options.framerate)\
+            .input(f"{WORKING_FOLDER}/frame{i}.jpg", framerate=w_options.frame_rate)\
             .output(f"{WORKING_FOLDER}/frame{i}.webm", video_bitrate=w_options.v_bitrate, vcodec=w_options.encoder)\
             .run(quiet=True, overwrite_output=True)
 

@@ -2,7 +2,7 @@ import tkinter as tk
 import tkinter.filedialog
 from consts import BG_PATH, ICON_PATH
 
-from wide import widen_image, widen_webm
+from wide import widen
 from wide_options import WideOptions
 
 
@@ -56,7 +56,7 @@ def show_ui():
 
     tk.Radiobutton(frame_input, text='WebM',
                    value=0, variable=var_input).pack()
-    tk.Radiobutton(frame_input, text='Image (currently not supported)',
+    tk.Radiobutton(frame_input, text='Image (only jpegs currently supported)',
                    value=1, variable=var_input).pack(anchor=tk.W)
 
     # populate radio buttons for selecting encoder type
@@ -80,13 +80,10 @@ def show_ui():
 
     def widen_file():
         wide_options = WideOptions(
-            var_file.get(), var_encoder.get(), int(txt_bitrate.get())
+            var_file.get(), var_encoder.get(), var_input.get(), int(txt_bitrate.get())
         )
 
-        if var_input.get() == 0:
-            widen_webm(window, var_status, wide_options)
-        else:
-            widen_image(window, var_status, wide_options)
+        widen(window, var_status, wide_options)
     # end_widen_file
 
     # draws buttons for widening process
