@@ -1,0 +1,2 @@
+MAX_HEIGHT = 540
+WORKING_FOLDER = "./tmp"

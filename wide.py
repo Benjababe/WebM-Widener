@@ -1,47 +1,15 @@
+from PIL import Image
 import ffmpeg
-import PIL
 import tkinter as tk
 
 import glob
 import math
 import os
 
-
-MAX_WIDTH = 960
-WORKING_FOLDER = "./tmp"
+from consts import MAX_HEIGHT, WORKING_FOLDER
 
 
-def show_ui():
-    window = tk.Tk()
-
-    lbl_f = tk.Label(text="File: ")
-    lbl_f.pack()
-    lbl_file = tk.Label(text="-")
-    lbl_file.pack(fill=tk.BOTH)
-
-    lbl_u = tk.Label(text="Status: ")
-    lbl_u.pack()
-    lbl_update = tk.Label(text="-")
-    lbl_update.pack(fill=tk.BOTH)
-
-    def pick_file():
-        file_dir = tk.filedialog.askopenfilename(
-            initialdir="./", title="Select webm", filetypes=(("webm files", "*.webm"), ("all files", "*"))
-        )
-        lbl_file["text"] = file_dir
-
-    btn_file = tk.Button(text="Select file", command=pick_file)
-    btn_file.pack()
-
-    btn_widen = tk.Button(text="Widen webm", command=lambda:
-                          widen(window, lbl_update, lbl_file["text"]))
-    btn_widen.pack()
-
-    window.geometry("400x150")
-    window.mainloop()
-
-
-def widen(window, lbl_update, file_dir, widen_rate=2):
+def widen_webm(window: tk.Tk, lbl_update: tk.Label, file_dir: str, encoder: str, widen_rate: int = 2):
     # quits if no file specified
     if file_dir == "":
         return
@@ -56,11 +24,11 @@ def widen(window, lbl_update, file_dir, widen_rate=2):
     widen_frames(window, lbl_update, frames, widen_rate)
 
     # converts frames into their own individual video
-    frame_to_webm(window, lbl_update, frames)
+    frame_to_webm(window, lbl_update, frames, encoder)
 
     # concatenates all videos together, keeping the WIDE resolution for each frame
     # TODO find a way to do it natively for ffmpeg-python
-    concat_webm(window, lbl_update, frames, file_dir)
+    concat_webm(window, lbl_update, frames, file_dir, encoder)
 
     # cleanup crew
     clean_up()
@@ -73,6 +41,7 @@ def get_frame_count(file_dir: str) -> int:
     true_framerate = probe["streams"][0]["r_frame_rate"].split("/")
     framerate = float(true_framerate[0]) / float(true_framerate[1])
     return math.floor(duration * framerate)
+# end_get_frame_count
 
 
 def split_video(window: tk.Tk, lbl_update: tk.Label, file_dir: str):
@@ -89,16 +58,15 @@ def split_video(window: tk.Tk, lbl_update: tk.Label, file_dir: str):
 
 
 def widen_frames(window: tk.Tk, lbl_update: tk.Label, frames: int, widen_rate: int):
-    global MAX_WIDTH
+    global MAX_HEIGHT
 
     for i in range(frames):
-        img = PIL.Image.open(f"{WORKING_FOLDER}/frame{i}.jpg")
+        img = Image.open(f"{WORKING_FOLDER}/frame{i}.jpg")
+
+        new_height = img.height if img.height < MAX_HEIGHT else MAX_HEIGHT
 
         new_width = img.width + i * widen_rate \
-            if img.width < MAX_WIDTH else MAX_WIDTH + i * widen_rate
-
-        new_height = img.height if img.width < MAX_WIDTH \
-            else math.floor(img.height * MAX_WIDTH / img.width)
+            if img.height < MAX_HEIGHT else math.floor(img.width * MAX_HEIGHT / img.height) + i * widen_rate
 
         img_resized = img.resize((new_width, new_height))
         img_resized.save(f"{WORKING_FOLDER}/frame{i}.jpg")
@@ -109,12 +77,12 @@ def widen_frames(window: tk.Tk, lbl_update: tk.Label, frames: int, widen_rate: i
 # end_widen_frames
 
 
-def frame_to_webm(window: tk.Tk, lbl_update: tk.Label, frames: int):
+def frame_to_webm(window: tk.Tk, lbl_update: tk.Label, frames: int, encoder: str):
     for i in range(frames):
         ffmpeg\
             .input(f"{WORKING_FOLDER}/frame{i}.jpg", framerate=24)\
-            .output(f"{WORKING_FOLDER}/frame{i}.webm", video_bitrate=100000, vcodec="libvpx")\
-            .run(quiet=True, overwrite_output=True)
+            .output(f"{WORKING_FOLDER}/frame{i}.webm", video_bitrate=50000, vcodec=encoder)\
+            .run(overwrite_output=True)
 
         print(f"Converting frame to video {i} / {frames-1}")
         lbl_update["text"] = f"Converting frame to video {i} / {frames-1}"
@@ -122,7 +90,7 @@ def frame_to_webm(window: tk.Tk, lbl_update: tk.Label, frames: int):
 # end_frame_to_webm
 
 
-def concat_webm(window: tk.Tk, lbl_update: tk.Label, frames: int, file_dir: str):
+def concat_webm(window: tk.Tk, lbl_update: tk.Label, frames: int, file_dir: str, encoder: str):
     # WORKING_FOLDER not needed here because it uses the cat.txt's reference directory
     webm_list = [
         f"file 'frame{i}.webm'" for i in range(frames)
@@ -139,7 +107,7 @@ def concat_webm(window: tk.Tk, lbl_update: tk.Label, frames: int, file_dir: str)
     window.update()
 
     os.system(
-        f"ffmpeg -y -f concat -safe 0 -i {WORKING_FOLDER}/cat.txt -c copy wide_{file_name}"
+        f"ffmpeg -y -f concat -safe 0 -i {WORKING_FOLDER}/cat.txt -c copy wide_{encoder}_{file_name}"
     )
 
     lbl_update["text"] = "Widening completed!"
@@ -157,7 +125,3 @@ def clean_up():
     os.remove(f"{WORKING_FOLDER}/cat.txt")
     os.rmdir(WORKING_FOLDER)
 # end_clean_up
-
-
-if __name__ == "__main__":
-    show_ui()
