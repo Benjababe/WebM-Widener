@@ -13,11 +13,11 @@ from wide_options import WideOptions
 
 # global variables to update ui
 main_window: tk.Tk = None
-lbl: tk.Label = None
+main_var: tk.StringVar = None
 
 
-def widen_webm(window: tk.Tk, lbl_status: tk.Label, w_options: WideOptions):
-    global main_window, lbl
+def widen_webm(window: tk.Tk, var_status: tk.StringVar, w_options: WideOptions):
+    global main_window, main_var
 
     # quits if no file specified
     if w_options.file_dir == "":
@@ -25,7 +25,7 @@ def widen_webm(window: tk.Tk, lbl_status: tk.Label, w_options: WideOptions):
 
     # keeping reference to ui globally
     main_window = window
-    lbl = lbl_status
+    main_var = var_status
 
     # find frame count and framerate of video
     w_options.frames = get_frame_count(w_options)
@@ -50,8 +50,9 @@ def widen_webm(window: tk.Tk, lbl_status: tk.Label, w_options: WideOptions):
 
 
 def update_lbl_status(update_str: str, col: str = "#000"):
-    lbl["text"] = update_str
-    lbl.config(fg=col)
+    global main_window, main_var
+
+    main_var.set(update_str)
     main_window.update()
 # end_update_status_lbl
 

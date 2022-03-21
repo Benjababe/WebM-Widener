@@ -17,14 +17,22 @@ def show_ui():
     frame_main = tk.Label(window, image=bg)
     frame_main.pack()
 
+    # label for file path
     frame_file = tk.LabelFrame(frame_main, text='File')
     frame_file.grid(row=1)
-    lbl_file = tk.Label(frame_file, text="-")
+
+    var_file = tk.StringVar(frame_file, value="-")
+
+    lbl_file = tk.Label(frame_file, textvariable=var_file)
     lbl_file.pack(padx=6)
 
+    # label for current widening status
     frame_status = tk.LabelFrame(frame_main, text='Status')
     frame_status.grid(row=2)
-    lbl_status = tk.Label(frame_status, text="-")
+
+    var_status = tk.StringVar(frame_status, value="-")
+
+    lbl_status = tk.Label(frame_status, textvariable=var_status)
     lbl_status.pack(padx=6)
 
     # opens file picker
@@ -32,7 +40,7 @@ def show_ui():
         file_dir = tkinter.filedialog.askopenfilename(
             initialdir="./", title="Select File", filetypes=(("WebM files", "*.webm"), ("Image files", "*.png"), ("All files", "*"))
         )
-        lbl_file["text"] = file_dir
+        var_file.set(file_dir)
         window.update()
     # end_pick_file
 
@@ -41,10 +49,10 @@ def show_ui():
     btn_file.pack(padx=6, pady=6)
 
     # populate radio buttons for selecting input type
-    var_input = tk.IntVar()
-
     frame_input = tk.LabelFrame(frame_main, text='Input Type')
     frame_input.grid(row=3)
+
+    var_input = tk.IntVar(frame_input, value=0)
 
     tk.Radiobutton(frame_input, text='WebM',
                    value=0, variable=var_input).pack()
@@ -52,10 +60,10 @@ def show_ui():
                    value=1, variable=var_input).pack(anchor=tk.W)
 
     # populate radio buttons for selecting encoder type
-    var_encoder = tk.StringVar()
-
     frame_encoder = tk.LabelFrame(frame_main, text='Video Encoder')
     frame_encoder.grid(row=4)
+
+    var_encoder = tk.StringVar(frame_encoder, value="libvpx")
 
     tk.Radiobutton(frame_encoder, text='libvpx (VP8, for posting on imageboards)',
                    value="libvpx", variable=var_encoder).pack()
@@ -72,11 +80,11 @@ def show_ui():
 
     def widen_file():
         wide_options = WideOptions(
-            lbl_file["text"], var_encoder.get(), int(txt_bitrate.get())
+            var_file.get(), var_encoder.get(), int(txt_bitrate.get())
         )
 
         if var_input.get() == 0:
-            widen_webm(window, lbl_status, wide_options)
+            widen_webm(window, var_status, wide_options)
         else:
             print("Do image here")
     # end_widen_file
