@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.filedialog
+from consts import BG_PATH, ICON_PATH
 
 from wide import widen_webm
 from wide_options import WideOptions
@@ -8,25 +9,23 @@ from wide_options import WideOptions
 def show_ui():
     window = tk.Tk()
     window.title("WebM Widener")
+    window.iconbitmap(ICON_PATH)
     window.geometry("450x350")
 
     # main frame to contain everything
-    frame_main = tk.Label(window)
+    bg = tk.PhotoImage(file=BG_PATH)
+    frame_main = tk.Label(window, image=bg)
     frame_main.pack()
 
-    # draws info labels for visual progress
-    frame_info = tk.Label(frame_main)
-    frame_info.grid(row=2)
+    frame_file = tk.LabelFrame(frame_main, text='File')
+    frame_file.grid(row=1)
+    lbl_file = tk.Label(frame_file, text="-")
+    lbl_file.pack(padx=6)
 
-    lbl_f = tk.Label(frame_info, text="File: ")
-    lbl_f.pack()
-    lbl_file = tk.Label(frame_info, text="-")
-    lbl_file.pack(fill=tk.BOTH)
-
-    lbl_u = tk.Label(frame_info, text="Status: ")
-    lbl_u.pack()
-    lbl_update = tk.Label(frame_info, text="-")
-    lbl_update.pack(fill=tk.BOTH)
+    frame_status = tk.LabelFrame(frame_main, text='Status')
+    frame_status.grid(row=2)
+    lbl_status = tk.Label(frame_status, text="-")
+    lbl_status.pack(padx=6)
 
     # opens file picker
     def pick_file():
@@ -36,6 +35,10 @@ def show_ui():
         lbl_file["text"] = file_dir
         window.update()
     # end_pick_file
+
+    # adds file picker button to file frame
+    btn_file = tk.Button(frame_file, text="Select File", command=pick_file)
+    btn_file.pack(padx=6, pady=6)
 
     # populate radio buttons for selecting input type
     var_input = tk.IntVar()
@@ -60,16 +63,12 @@ def show_ui():
                    value="libvpx-vp9", variable=var_encoder).pack(anchor=tk.W)
 
     # draws textbox for bitrate entry
-    frame_bitrate = tk.LabelFrame(frame_main, text='Bitrate (bps)')
+    frame_bitrate = tk.LabelFrame(frame_main, text='Video Bitrate (bps)')
     frame_bitrate.grid(row=5)
 
     txt_bitrate = tk.Entry(frame_bitrate)
     txt_bitrate.insert(0, 50000)
-    txt_bitrate.pack()
-
-    # draws buttons for selecting file and starting widening
-    btn_file = tk.Button(text="Select File", command=pick_file)
-    btn_file.pack(pady=6)
+    txt_bitrate.pack(padx=6, pady=6)
 
     def widen_file():
         wide_options = WideOptions(
@@ -77,13 +76,15 @@ def show_ui():
         )
 
         if var_input.get() == 0:
-            widen_webm(window, lbl_update, wide_options)
+            widen_webm(window, lbl_status, wide_options)
         else:
             print("Do image here")
+    # end_widen_file
 
-    btn_widen = tk.Button(text="Start Widening",
+    # draws buttons for widening process
+    btn_widen = tk.Button(frame_main, text="Start Widening",
                           command=widen_file)
-    btn_widen.pack(pady=6)
+    btn_widen.grid(row=7, pady=6)
 
     window.mainloop()
 
