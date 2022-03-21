@@ -2,6 +2,7 @@ import tkinter as tk
 import tkinter.filedialog
 
 from wide import widen_webm
+from wide_options import WideOptions
 
 
 def show_ui():
@@ -44,7 +45,7 @@ def show_ui():
 
     tk.Radiobutton(frame_input, text='WebM',
                    value=0, variable=var_input).pack()
-    tk.Radiobutton(frame_input, text='Image (only png supported)',
+    tk.Radiobutton(frame_input, text='Image (currently not supported)',
                    value=1, variable=var_input).pack(anchor=tk.W)
 
     # populate radio buttons for selecting encoder type
@@ -58,13 +59,25 @@ def show_ui():
     tk.Radiobutton(frame_encoder, text='libvpx-vp9 (VP9)',
                    value="libvpx-vp9", variable=var_encoder).pack(anchor=tk.W)
 
+    # draws textbox for bitrate entry
+    frame_bitrate = tk.LabelFrame(frame_main, text='Bitrate (bps)')
+    frame_bitrate.grid(row=5)
+
+    txt_bitrate = tk.Entry(frame_bitrate)
+    txt_bitrate.insert(0, 50000)
+    txt_bitrate.pack()
+
     # draws buttons for selecting file and starting widening
     btn_file = tk.Button(text="Select File", command=pick_file)
     btn_file.pack()
 
     def widen_file():
+        wide_options = WideOptions(
+            lbl_file["text"], var_encoder.get(), int(txt_bitrate.get())
+        )
+
         if var_input.get() == 0:
-            widen_webm(window, lbl_update, lbl_file["text"], var_encoder.get())
+            widen_webm(window, lbl_update, wide_options)
         else:
             print("Do image here")
 
