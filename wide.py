@@ -99,6 +99,7 @@ def generate_frames(w_options: WideOptions):
     for i in range(w_options.frame_count):
         x_inc = (i * w_options.widen_rate)
         new_img = base_img.resize((base_img.width + x_inc, base_img.height))
+        new_img = new_img.convert("RGB")
         new_img.save(f"{WORKING_FOLDER}/frame{i}.jpg")
 
         update_lbl_status(f"Resizing frame {i} / {w_options.frame_count-1}")

@@ -1,7 +1,8 @@
 import tkinter as tk
 import tkinter.filedialog
-from consts import BG_PATH, ICON_PATH
+import platform
 
+from consts import BG_PATH, ICON_PATH
 from wide import widen
 from wide_options import WideOptions
 
@@ -26,8 +27,11 @@ class WebmWidener(tk.Tk):
 
     def setup_window(self):
         self.title("WebM Widener")
-        self.geometry("450x350")
-        self.iconbitmap(ICON_PATH)
+        self.geometry("450x400")
+
+        # i will find a way someday
+        if platform.system() != "Linux":
+            self.iconbitmap(ICON_PATH)
     # end_setup_window
 
     def setup_variables(self):
@@ -67,9 +71,13 @@ class WebmWidener(tk.Tk):
     # end_draw_status_frame
 
     def pick_file(self):
-        file_dir = tkinter.filedialog.askopenfilename(
-            initialdir="./", title="Select File", filetypes=(("WebM files", "*.webm"), ("Image files", "*.jpg"), ("All files", "*"))
+        filetypes = (
+            ("WebM files", "*.webm"),
+            ("Image files", "*.jpg *.png"),
+            ("All files", "*")
         )
+        file_dir = tkinter.filedialog.askopenfilename(
+            initialdir="./", title="Select File", filetypes=filetypes)
         self.var_file.set(file_dir)
         self.update()
     # end_pick_file
@@ -80,7 +88,7 @@ class WebmWidener(tk.Tk):
 
         tk.Radiobutton(frame_input, text='WebM',
                        value=0, variable=self.var_input).pack()
-        tk.Radiobutton(frame_input, text='Image (only jpegs currently supported)',
+        tk.Radiobutton(frame_input, text='Image (png and jpeg supported)',
                        value=1, variable=self.var_input).pack(anchor=tk.W)
     # end_draw_input_frame
 
