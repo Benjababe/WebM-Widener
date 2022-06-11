@@ -3,8 +3,8 @@ import tkinter.filedialog
 import platform
 
 from consts import BG_PATH, ICON_PATH
-from wide import widen
-from wide_options import WideOptions
+from process import resize_video
+from options import Options
 
 
 class WebmWidener(tk.Tk):
@@ -20,9 +20,9 @@ class WebmWidener(tk.Tk):
 
         self.draw_input_frame()
         self.draw_encoder_frame()
-        self.draw_bitrate_frmae()
+        self.draw_bitrate_frame()
 
-        self.draw_widen_btn()
+        self.draw_process_btn()
     # end__init__
 
     def setup_window(self):
@@ -102,7 +102,7 @@ class WebmWidener(tk.Tk):
                        value="libvpx-vp9", variable=self.var_encoder).pack(anchor=tk.W)
     # end_draw_encoder_frame
 
-    def draw_bitrate_frmae(self):
+    def draw_bitrate_frame(self):
         frame_bitrate = tk.LabelFrame(
             self.frame_main, text='Video Bitrate (bps)')
         frame_bitrate.grid(row=5)
@@ -112,21 +112,22 @@ class WebmWidener(tk.Tk):
         self.txt_bitrate.pack(padx=6, pady=6)
     # end_draw_bitrate_frame
 
-    def start_widen(self):
-        wide_options = WideOptions(
+    def start_processing(self):
+        options = Options(
             self.var_file.get(), self.var_encoder.get(),
-            self.var_input.get(), int(self.txt_bitrate.get())
+            self.var_input.get(), int(self.txt_bitrate.get()),
+            pixel_x_rate=-3, pixel_y_rate=0
         )
-        widen(self, self.var_status, wide_options)
-    # end_start_widen
+        resize_video(self, self.var_status, options)
+    # end_start_processing
 
-    def draw_widen_btn(self):
-        btn_widen = tk.Button(self.frame_main, text="Start Widening",
-                              command=self.start_widen)
-        btn_widen.grid(row=7, pady=6)
-    # end_draw_widen_btn
+    def draw_process_btn(self):
+        btn_process = tk.Button(self.frame_main, text="Process Video",
+                                command=self.start_processing)
+        btn_process.grid(row=7, pady=6)
+    # end_draw_process_btn
 
 
 if __name__ == "__main__":
-    widener = WebmWidener()
-    widener.mainloop()
+    app = WebmWidener()
+    app.mainloop()
